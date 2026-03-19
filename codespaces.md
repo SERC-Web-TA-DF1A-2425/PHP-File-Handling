@@ -6,7 +6,7 @@ This repository is configured to run in a GitHub Codespace. A Codespace is a clo
 
 ### Services Installed
 
-- **PHP**: PHP (8.2) is installed for running web applications.
+- **PHP**: PHP (8.3) is installed for running web applications.
 - **MariaDB**: A MySQL-compatible database server for storing data. This is installed as a docker container.
 - **phpMyAdmin**: A web-based database management tool for managing MariaDB. This is installed as a docker container.
 
@@ -16,7 +16,7 @@ Ports are forwarded from the Codespace to the host machine to allow access to se
 
 The following ports are forwarded for use in the Codespace. If running the codespace in a web browser, these will be forwarded via a reverse proxy. If running the codespace in a local development environment or directly in VS Code, these ports will be forwarded to the host machine and be available at `localhost`.
 
-- **8080**: PHP's built-in web server. This is not running by default but can be started with the command: `php -S localhost:8080`. This command is also pre-configured as a VS Code task.
+- **8000**: PHP's built-in web server. This is not running by default but can be started with the command: `php -S localhost:8000`. This command is also pre-configured as a VS Code task.
 - **3306**: MariaDB database server.
 - **8081**: phpMyAdmin database management tool.
 
