@@ -80,8 +80,9 @@ Explanation:
 - The `template.php` file contains the common structure for all pages of the gallery.
 - The `styles.css` file provides basic styling for the gallery.
 - The `index.php` file displays a welcome message on the home page.
-    - `ob_start()` and `ob_get_clean()` are used to capture the output generated within the PHP block and assign it to the $content variable.
-    - The $page_title and $content variables are used to customize the title and content of the page. These variables are then included in the template using PHP echo statements.
+    - `ob_start()` starts **output buffering**, which means PHP holds any output (HTML, echo statements, etc.) in memory instead of sending it to the browser immediately.
+    - `ob_get_clean()` retrieves the buffered output as a string and then clears (and stops) the buffer. This lets you capture a block of HTML into a variable (`$content`) that can be passed into the template.
+    - The `$page_title` and `$content` variables are set before `include "template.php"` is called. When the template file is included, it runs in the same scope and can access those variables directly via PHP `echo` statements.
 
 
 ## 2. Create File Upload Form
@@ -110,9 +111,9 @@ include "template.php";
 
 Explanation:
 - The `upload.php` file contains a form for users to upload images to the gallery.
-    - The form uses the `enctype="multipart/form-data"` attribute to allow file uploads.
-    - The `accept` attribute specifies the file types that can be uploaded (in this case, images with extensions .jpg, .jpeg, .png, .gif).
-    - The form does not have an `action` attribute. When the `action` attribute is omitted, the form will submit to the same page by default. 
+    - The form uses the `enctype="multipart/form-data"` attribute to allow file uploads. Without this attribute, the browser will only send the file name as text — the actual file contents will not be transmitted.
+    - The `accept` attribute specifies the file types that can be uploaded (in this case, images with extensions .jpg, .jpeg, .png, .gif). This provides a helpful filter in the file-picker dialog but is enforced only in the browser, not on the server — always validate file types in your PHP code as well.
+    - The form does not have an `action` attribute. When the `action` attribute is omitted, the form will submit to the same page by default.
 - The uploaded file will be processed in the next steps.
 
 2. Style the upload form by adding CSS to the `styles.css` file.
@@ -294,9 +295,10 @@ Explanation:
 
 - The `gallery.php` file displays the uploaded images and their thumbnails in a gallery format.
 - The `uploads/` directory contains the original images, while the `thumbnails/` directory contains the generated thumbnail images.
-- The `glob()` function is used to retrieve all image files (with extensions .jpg, .jpeg, .png, .gif) from the `uploads/` directory.
-- For each image, an anchor tag (`<a>`) is created with the original image as the target and the thumbnail image as the source.
-- Clicking on a thumbnail will open the original image in a new tab.
+- `glob($pattern, GLOB_BRACE)` searches for files matching a given pattern. The `{jpg,jpeg,png,gif}` part of the pattern uses brace expansion (enabled by the `GLOB_BRACE` flag) to match any of those four extensions in a single call. Without `GLOB_BRACE`, brace expansion is not supported and the pattern would be treated literally.
+- For each image, an anchor tag (`<a>`) is created with the original image as the `href` target and the thumbnail image as the `<img>` source.
+- `basename($image)` strips the directory prefix from the full path so that the thumbnail path can be constructed correctly from the `thumbnails/` directory.
+- Clicking on a thumbnail opens the original full-size image in a new browser tab (`target='_blank'`).
 
 
 ## 6. Further Enhancements

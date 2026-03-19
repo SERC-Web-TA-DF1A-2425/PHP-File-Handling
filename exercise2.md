@@ -35,7 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 ### Explanation
 - Use the `$_FILES` superglobal to access uploaded file information.
-- Use the `move_uploaded_file()` function to move the uploaded file to the desired directory.
+- Use the `move_uploaded_file()` function to move the uploaded file from its temporary server location to the desired directory. It also verifies that the file was legitimately uploaded via HTTP POST, which is an important security check.
+- The HTML form requires `enctype="multipart/form-data"` to enable file uploads. Without this attribute, the browser sends only the file name, not the file contents.
+- `basename()` extracts just the file name from a full path (e.g., `"uploads/photo.jpg"` → `"photo.jpg"`), preventing path traversal attacks where a malicious file name like `"../../config.php"` could overwrite sensitive files.
+- `htmlspecialchars()` converts special characters (such as `<`, `>`, and `&`) to safe HTML entities before displaying them in the browser, protecting against Cross-Site Scripting (XSS) attacks.
 
 ### Sample Code
 ```php
@@ -92,7 +95,8 @@ if (file_exists($targetFile)) {
 
 ### Explanation
 - Use the `$_FILES["uploaded_file"]["size"]` property to check the file size.
-- 2MB = 2 * 1024 * 1024 bytes.
+- 2MB = 2 * 1024 * 1024 bytes. There are 1024 bytes in a kilobyte, and 1024 kilobytes in a megabyte.
+- This check uses the file size reported by the browser. For a more robust check, you can also configure the `upload_max_filesize` and `post_max_size` directives in `php.ini` to enforce server-side limits regardless of what the script does.
 
 ### Sample Code
 ```php
@@ -113,8 +117,10 @@ if ($_FILES["uploaded_file"]["size"] > $maxFileSize) {
 2. If the file type is not allowed, display an error message.
 
 ### Explanation
-- Use the `pathinfo()` function to get the file extension.
-- Compare the file extension against an array of allowed types.
+- `pathinfo($path, PATHINFO_EXTENSION)` extracts the file extension from a file path. For example, `pathinfo("photo.JPG", PATHINFO_EXTENSION)` returns `"JPG"`.
+- `strtolower()` converts the extension to lowercase so that comparisons work regardless of how the user capitalised the extension (e.g., `.JPG`, `.Jpg`, and `.jpg` all become `"jpg"`).
+- `in_array($value, $array)` checks whether `$value` exists in `$array`. Here it checks whether the uploaded file's extension is in the list of allowed types.
+- **Note:** Checking the file extension alone is not fully secure because a malicious user could rename a file to have an allowed extension. For stronger validation, also check the file's MIME type using `$_FILES["uploaded_file"]["type"]` or the `mime_content_type()` function.
 
 ### Sample Code
 ```php
@@ -137,6 +143,8 @@ if (!in_array($fileType, $allowedTypes)) {
 
 ### Explanation
 - Perform all checks sequentially before calling `move_uploaded_file()`.
+- The sample code checks existence first, then size, then file type. Rejecting invalid file types and oversized files early avoids unnecessary filesystem operations, so consider performing those checks before the existence check in larger applications.
+- Only call `move_uploaded_file()` after all validation has passed to ensure that only safe, correctly-sized, correctly-typed files are saved to the server.
 
 ### Sample Code
 ```php

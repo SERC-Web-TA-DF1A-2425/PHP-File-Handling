@@ -33,9 +33,23 @@ if (file_exists($filename)) {
 4. Close the file using `fclose()`.
 
 ### Explanation
-- `fopen()` opens a file and returns a file handle.
-- `fread()` reads a specified number of bytes from the file.
-- `fclose()` closes the file to free resources.
+- `fopen()` opens a file and returns a **file handle** — a resource that PHP uses internally to track the open file's position and state. You pass this handle to other functions like `fread()` and `fclose()`.
+- `fread($file, $length)` reads up to `$length` bytes from the file. Passing `filesize($filename)` as the length reads the entire file at once.
+- `fclose()` closes the file and releases the system resources associated with it. Always close files after you are done with them.
+- `nl2br()` converts newline characters (`\n`) in a string to HTML `<br>` tags so that line breaks are visible in the browser.
+
+### File Modes Reference
+When using `fopen()`, the second argument specifies how the file should be opened:
+
+| Mode | Description |
+|------|-------------|
+| `r`  | Read only. File pointer starts at the beginning. |
+| `w`  | Write only. Truncates (empties) the file, or creates it if it doesn't exist. |
+| `a`  | Append only. File pointer starts at the end, or creates the file if it doesn't exist. |
+| `x`  | Write only. Creates the file; fails if the file already exists. |
+| `r+` | Read and write. File pointer starts at the beginning. |
+| `w+` | Read and write. Truncates the file, or creates it if it doesn't exist. |
+| `a+` | Read and append. File pointer starts at the end, or creates the file if it doesn't exist. |
 
 ### Sample Code
 ```php
@@ -60,8 +74,9 @@ if (file_exists($filename)) {
 3. Display each line on the webpage.
 
 ### Explanation
-- `fgets()` reads one line from the file at a time.
-- This is useful for large files where reading the entire file at once is inefficient.
+- `fgets()` reads one line from the file at a time, up to (and including) the newline character.
+- This is useful for large files where reading the entire file at once would consume too much memory.
+- The condition `!== false` uses **strict comparison** (type and value). `fgets()` returns `false` when it reaches the end of the file (EOF) or encounters a read error. Because `fgets()` can also return an empty string `""` for an empty line, using `!=` instead of `!==` would incorrectly treat an empty line as `false` and stop the loop early. Using `!== false` ensures the loop continues until `fgets()` genuinely returns `false` (EOF or error).
 
 ### Sample Code
 ```php
@@ -88,8 +103,9 @@ if (file_exists($filename)) {
 4. Close the file using `fclose()`.
 
 ### Explanation
-- Opening a file in write mode (`w`) overwrites its contents.
+- Opening a file in write mode (`w`) **overwrites** (truncates) any existing content in the file. If the file does not exist, it will be created automatically.
 - Use `fwrite()` to write data to the file.
+- `PHP_EOL` is a built-in PHP constant that represents the correct end-of-line character(s) for the operating system the script is running on (`\r\n` on Windows, `\n` on Linux/macOS). Using `PHP_EOL` instead of a hard-coded `"\n"` makes your code portable across platforms.
 
 ### Sample Code
 ```php
@@ -117,7 +133,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 2. Use the `fopen()` function to open the file in append mode (`a`).
 
 ### Explanation
-- Opening a file in append mode (`a`) adds new data to the end of the file without overwriting existing content.
+- Opening a file in append mode (`a`) adds new data to the **end** of the file without erasing existing content. This is the key difference from write mode (`w`), which truncates the file first.
+- If the file does not yet exist, append mode will create it, just like write mode.
+- All other aspects (using `fwrite()`, `fclose()`, etc.) remain the same as in Exercise 1.4.
 
 ### Sample Code
 ```php
