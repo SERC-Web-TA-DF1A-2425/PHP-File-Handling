@@ -110,6 +110,50 @@ if ($_FILES["uploaded_file"]["size"] > $maxFileSize) {
 }
 ```
 
+### Modifying PHP Configuration for Larger File Uploads
+
+PHP enforces its own server-side upload limits independently of any checks in your script. If you need to allow files larger than the defaults, you must update two directives in your `php.ini` file:
+
+| Directive | Default | Description |
+|-----------|---------|-------------|
+| `upload_max_filesize` | `2M` | Maximum size of a single uploaded file. |
+| `post_max_size` | `8M` | Maximum size of the entire POST request body (must be larger than `upload_max_filesize`). |
+
+**Steps to update `php.ini`:**
+
+1. Find the location of the active `php.ini` file by running the following command in your terminal:
+   ```bash
+   php --ini
+   ```
+   Look for the line starting with `Loaded Configuration File`.
+
+2. Open the file in a text editor and locate the two directives. Update them to the values you need, for example to allow up to 20MB uploads:
+   ```ini
+   upload_max_filesize = 20M
+   post_max_size = 24M
+   ```
+   > **Note:** `post_max_size` should always be larger than `upload_max_filesize` to leave room for the other form fields in the POST body.
+
+3. Save the file and restart your web server for the changes to take effect:
+   - **Apache:** `sudo systemctl restart apache2`
+   - **Nginx + PHP-FPM:** `sudo systemctl restart php-fpm`
+   - **Built-in PHP development server:** simply stop and restart the process.
+
+4. Verify the new limits are active by creating a small PHP file with:
+   ```php
+   <?php
+   echo 'upload_max_filesize: ' . ini_get('upload_max_filesize') . '<br>';
+   echo 'post_max_size: ' . ini_get('post_max_size');
+   ```
+
+**Alternative: using `.htaccess` for shared hosting**
+
+If you do not have access to `php.ini` (e.g., on a shared host), you can use a `.htaccess` file in your project root to override the limits. Note that `upload_max_filesize` and `post_max_size` are `PHP_INI_PERDIR` directives, meaning they can only be changed in `php.ini`, `.htaccess`, or `httpd.conf` — **not** at runtime with `ini_set()`. For shared hosting, use a `.htaccess` file instead:
+```apacheconf
+php_value upload_max_filesize 20M
+php_value post_max_size 24M
+```
+
 ---
 
 ## Exercise 2.4: Restricting File Types
